@@ -31,7 +31,7 @@ Follow these steps to set up the project:
     If you are on another operating system, you have to manually install dependencies and run the script you want.
     ```shell
     # install dependencies
-    pip install -q pycryptodome beautifulsoup4 requests autoslot tabulate pronotepy
+    pip install -q pycryptodome beautifulsoup4 requests autoslot tabulate pronotepy openpyxl pandas fpdf
 
     # run a script
     python [your-python-file]

@@ -161,13 +161,13 @@ if client.logged_in:
     output_format = input("Voulez-vous exporter l'emploi du temps en .txt (1) ou dans le terminal directement (2) ? ").strip()
 
 if output_format == "1":
-    with open("all-scripts/temp_timetable.txt", "w") as file:
+    with open("all-scripts/emploi_du_temps.txt", "w") as file:
     # Browse and view the timetable
         for lesson in timetable:
             # Write the content
             file.write(f"Leçon: {lesson.subject.name}\n")
             file.write(f"De {lesson.start} à {lesson.end}\n\n")
-    print("Emploi du temps exporté dans le fichier 'temp_timetable.txt'.")
+    print("Emploi du temps exporté dans le fichier 'emploi_du_temps.txt'.")
 elif output_format == "2":
         # Browse and view the timetable
     for lesson in timetable:

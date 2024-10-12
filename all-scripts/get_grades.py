@@ -144,3 +144,16 @@ if ENT is not None:  # Check if ENT is defined
         username=USERNAME,
         password=PASSWORD,
         ent=ENT)
+    
+if client.logged_in:
+    # Get the current period (or any specific period)
+    current_period = client.periods[0]  # Assume first period is the current one
+
+    # Retrieve the grades for this period
+    grades = current_period.grades
+
+    # Print the grades
+    for grade in grades:
+        print(f"Matière: {grade.subject.name}, Note: {grade.grade}/{grade.out_of}, moyenne (classe) : {grade.average}")
+else:
+    print("Connexion impossible.")

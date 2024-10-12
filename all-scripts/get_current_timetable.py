@@ -162,7 +162,7 @@ if client.logged_in:
 
 if output_format == "1":
     with open("all-scripts/emploi_du_temps.txt", "w") as file:
-    # Browse and view the timetable
+    # Browse and view the timetable in txt format
         for lesson in timetable:
             # Write the content
             file.write(f"Leçon: {lesson.subject.name}\n")

@@ -161,7 +161,11 @@ if client.logged_in:  # Check if client successfully logged in
         # Check if menus are available
         if menus:
             if menus[0].first_meal:  # Check if the first meal is available
-                print(menus[0].first_meal[0].name)  # Print first menu's first meal name
+                print(menus[0].first_meal[0].name)  # Print menu's first meal name
+            if menus[0].main_meal: # Check if the main meal is available
+                print(menus[0].main_meal[0].name) # Print menu's main meal name
+            if menus[0].dessert: # Check if the dessert is available
+                print(menus[0].dessert[0].name) # Print menu's dessert name
             else:
                 print("Aucun repas disponible pour le premier menu.")
         else:

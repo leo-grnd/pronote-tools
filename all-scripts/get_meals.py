@@ -2,6 +2,7 @@ import datetime
 import os
 import pronotepy
 import configparser
+import getpass
 from pronotepy.ent import (
     cas_arsene76,
     cas_ent27,
@@ -100,7 +101,7 @@ if os.path.exists(config_file):
 else:
     # Ask user for login information
     USERNAME = str(input("Quel est votre nom d'utilisateur : "))
-    PASSWORD = str(input("Quel est votre mot de passe : "))
+    PASSWORD = getpass.getpass("Quel est votre mot de passe : ")
     
     # Display ENT options to the user
     print("Choisissez votre ENT parmi les options suivantes :")

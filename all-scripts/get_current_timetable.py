@@ -3,6 +3,8 @@ import os
 import pronotepy
 import configparser
 import getpass
+import pandas as pd  # For export to Excel
+from fpdf import FPDF  # For export to PDF
 from tabulate import tabulate
 from pronotepy.ent import (
     cas_arsene76,
@@ -145,20 +147,58 @@ if ENT is not None:  # Check if ENT is defined
         password=PASSWORD,
         ent=ENT)
     
+# Function to export the timetable to Excel
+def export_to_excel(timetable, filename):
+    # Create a dictionary list containing lesson data
+    lessons_data = []
+    for lesson in timetable:
+        lessons_data.append({
+            'Matière': lesson.subject.name,
+            'Début': lesson.start.strftime("%Y-%m-%d %H:%M"),
+            'Fin': lesson.end.strftime("%Y-%m-%d %H:%M"),
+        })
+
+    # Create a DataFrame and export it to Excel file
+    df = pd.DataFrame(lessons_data)
+    df.to_excel(filename, index=False)
+    print(f"Emploi du temps exporté avec succès en fichier Excel : {filename}")
+
+# Function to export the timetable to PDF
+def export_to_pdf(timetable, filename):
+    pdf = FPDF()
+    pdf.add_page()
+    pdf.set_font("Arial", size=12)
+
+    # Add lesson data to PDF
+    for lesson in timetable:
+        pdf.cell(200, 10, txt=f"Matière: {lesson.subject.name}", ln=True)
+        pdf.cell(200, 10, txt=f"De: {lesson.start.strftime('%Y-%m-%d %H:%M')} à {lesson.end.strftime('%Y-%m-%d %H:%M')}", ln=True)
+        pdf.ln()
+
+    # Save PDF file
+    pdf.output(filename)
+    print(f"Emploi du temps exporté avec succès en fichier PDF : {filename}")
+
 # Vérificate if connexion was etablished
 if client.logged_in:
-    # Calculate the date of next monday
     today = datetime.date.today()
-    days_ahead = 7 - today.weekday()  # Next monday will be in 'days_ahead' days
+    days_ahead = 7 - today.weekday()
     next_monday = today + datetime.timedelta(days=days_ahead)
     next_sunday = next_monday + datetime.timedelta(days=6)
-
-    # Get the timetable from next Monday
     timetable = client.lessons(next_monday, next_sunday)
 
-    # Browse and view the timetable
     for lesson in timetable:
         print(f"Leçon: {lesson.subject.name}")
         print(f"De {lesson.start} à {lesson.end}")
+
+    # Ask user for output format
+    output_format = input("Voulez-vous exporter l'emploi du temps en Excel (1) ou en PDF (2) ? ").strip()
+
+    if output_format == "1":
+        export_to_excel(timetable, "emploi_du_temps.xlsx")
+    elif output_format == "2":
+        export_to_pdf(timetable, "emploi_du_temps.pdf")
+    else:
+        print("Format non reconnu. Veuillez choisir entre 1 (Excel) et 2 (PDF).")
 else:
     print("Connexion échouée.")

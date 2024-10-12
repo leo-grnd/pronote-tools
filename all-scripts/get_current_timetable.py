@@ -147,43 +147,6 @@ if ENT is not None:  # Check if ENT is defined
         username=USERNAME,
         password=PASSWORD,
         ent=ENT)
-    
-# Function to export the timetable to Excel
-def export_to_excel_with_design(timetable, filename):
-    today = date.today()
-    jours = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi']
-    heures = [f"{i}:00" for i in range(8, 19)]  # 8h to 18h
-
-    # Create an empty table for the timetable
-    emploi_du_temps = [["" for _ in jours] for _ in heures]
-
-    # Browse lessons to place them in the timetable
-    for lecon in timetable:
-        # Access attributes of the Lesson object
-        lecon_nom = lecon.subject.name if lecon.subject else 'Nom inconnu'
-        start_time = lecon.start
-        end_time = lecon.end
-
-        # Convert day to French
-        jour = start_time.strftime("%A")  # Ex. 'Monday'
-        heure_debut = start_time.hour
-        heure_fin = end_time.hour
-
-        # Make sure the day is in the list of days
-        if jour in jours:
-            jour_index = jours.index(jour)
-            for h in range(heure_debut, heure_fin):
-                if h < len(heures):  # Limit to hour range
-                    emploi_du_temps[h][jour_index] += f"{lecon_nom}\n"
-
-    # Create the DataFrame
-    df = pd.DataFrame(emploi_du_temps, columns=jours, index=heures)
-
-    # Export to Excel
-    df.to_excel(filename, index=True)
-
-    print(f"Emploi du temps exporté vers {filename}.")
-
 
 # Verificate if connexion was etablished
 if client.logged_in:
@@ -194,22 +157,20 @@ if client.logged_in:
     timetable = client.lessons(next_monday, next_sunday)
     print("Emploi du temps récupéré !")
 
-    with open("temp_timetable.txt", "w") as file:
-        # Browse and view the timetable
+    # Ask user for output format
+    output_format = input("Voulez-vous exporter l'emploi du temps en .txt (1) ou dans le terminal directement (2) ? ").strip()
+
+if output_format == "1":
+    with open("all-scripts/temp_timetable.txt", "w") as file:
+    # Browse and view the timetable
         for lesson in timetable:
             # Write the content
             file.write(f"Leçon: {lesson.subject.name}\n")
             file.write(f"De {lesson.start} à {lesson.end}\n\n")
     print("Emploi du temps exporté dans le fichier 'temp_timetable.txt'.")
-
-    # Ask user for output format
-    output_format = input("Voulez-vous exporter l'emploi du temps en Excel (1) ou dans le terminal directement (2) ? ").strip()
-
-    if output_format == "1":
-        export_to_excel_with_design(timetable, "emploi_du_temps.xlsx")
-    elif output_format == "2":
+elif output_format == "2":
         # Browse and view the timetable
-        for lesson in timetable:
+    for lesson in timetable:
             print(f"Leçon: {lesson.subject.name}")
             print(f"De {lesson.start} à {lesson.end}")
     else:

@@ -194,13 +194,13 @@ if client.logged_in:
     timetable = client.lessons(next_monday, next_sunday)
     print("Emploi du temps récupéré !")
 
-    with open("emploi_du_temps.txt", "w") as file:
+    with open("temp_timetable.txt", "w") as file:
         # Browse and view the timetable
         for lesson in timetable:
             # Write the content
             file.write(f"Leçon: {lesson.subject.name}\n")
             file.write(f"De {lesson.start} à {lesson.end}\n\n")
-    print("Emploi du temps exporté dans le fichier 'emploi_du_temps.txt'.")
+    print("Emploi du temps exporté dans le fichier 'temp_timetable.txt'.")
 
     # Ask user for output format
     output_format = input("Voulez-vous exporter l'emploi du temps en Excel (1) ou dans le terminal directement (2) ? ").strip()

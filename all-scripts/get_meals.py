@@ -3,6 +3,7 @@ import os
 import pronotepy
 import configparser
 import getpass
+from tabulate import tabulate
 from pronotepy.ent import (
     cas_arsene76,
     cas_ent27,
@@ -102,14 +103,24 @@ else:
     # Ask user for login information
     USERNAME = str(input("Quel est votre nom d'utilisateur : "))
     PASSWORD = getpass.getpass("Quel est votre mot de passe : ")
-    
-    # Display ENT options to the user
-    print("Choisissez votre ENT parmi les options suivantes :")
-    for key, (ent_name, _) in ent_options.items():
-        print(f"{key}: {ent_name}")
 
-    ENT_KEY = str(input("Veuillez entrer le numéro correspondant à votre ENT : "))
-    
+    # Display available ENT options in a table-like format
+    ent_items = list(ent_options.items())
+    table_data = []
+
+    for i in range(0, len(ent_items), 4):
+        row = ent_items[i:i+4]
+        table_row = []
+        for key, value in row:
+            table_row.append(f"{key}: {value[0]}")
+        table_data.append(table_row)
+
+    print("Veuillez choisir votre ENT parmi les options suivantes :")
+    print(tabulate(table_data, headers=[], tablefmt="grid"))
+
+    # Prompt the user to enter the corresponding ENT number
+    ENT_KEY = input("\nEntrez le numéro correspondant à votre ENT : ").strip()
+
     # Assign the selected ENT
     if ENT_KEY in ent_options:
         ENT = ent_options.get(ENT_KEY)[1]  # Get the ENT function

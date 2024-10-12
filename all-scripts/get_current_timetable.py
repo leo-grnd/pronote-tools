@@ -1,4 +1,5 @@
 import datetime
+from datetime import datetime, date, timedelta
 import os
 import pronotepy
 import configparser
@@ -148,57 +149,62 @@ if ENT is not None:  # Check if ENT is defined
         ent=ENT)
     
 # Function to export the timetable to Excel
-def export_to_excel(timetable, filename):
-    # Create a dictionary list containing lesson data
-    lessons_data = []
-    for lesson in timetable:
-        lessons_data.append({
-            'Matière': lesson.subject.name,
-            'Début': lesson.start.strftime("%Y-%m-%d %H:%M"),
-            'Fin': lesson.end.strftime("%Y-%m-%d %H:%M"),
-        })
+def export_to_excel_with_design(timetable, filename):
+    today = date.today()
+    jours = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi']
+    heures = [f"{i}:00" for i in range(8, 19)]  # 8h to 18h
 
-    # Create a DataFrame and export it to Excel file
-    df = pd.DataFrame(lessons_data)
-    df.to_excel(filename, index=False)
-    print(f"Emploi du temps exporté avec succès en fichier Excel : {filename}")
+    # Create an empty table for the timetable
+    emploi_du_temps = [["" for _ in jours] for _ in heures]
 
-# Function to export the timetable to PDF
-def export_to_pdf(timetable, filename):
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_font("Arial", size=12)
+    # Browse lessons to place them in the timetable
+    for lecon in timetable:
+        # Access attributes of the Lesson object
+        lecon_nom = lecon.subject.name if lecon.subject else 'Nom inconnu'
+        start_time = lecon.start
+        end_time = lecon.end
 
-    # Add lesson data to PDF
-    for lesson in timetable:
-        pdf.cell(200, 10, txt=f"Matière: {lesson.subject.name}", ln=True)
-        pdf.cell(200, 10, txt=f"De: {lesson.start.strftime('%Y-%m-%d %H:%M')} à {lesson.end.strftime('%Y-%m-%d %H:%M')}", ln=True)
-        pdf.ln()
+        # Convert day to French
+        jour = start_time.strftime("%A")  # Ex. 'Monday'
+        heure_debut = start_time.hour
+        heure_fin = end_time.hour
 
-    # Save PDF file
-    pdf.output(filename)
-    print(f"Emploi du temps exporté avec succès en fichier PDF : {filename}")
+        # Make sure the day is in the list of days
+        if jour in jours:
+            jour_index = jours.index(jour)
+            for h in range(heure_debut, heure_fin):
+                if h < len(heures):  # Limit to hour range
+                    emploi_du_temps[h][jour_index] += f"{lecon_nom}\n"
 
-# Vérificate if connexion was etablished
+    # Create the DataFrame
+    df = pd.DataFrame(emploi_du_temps, columns=jours, index=heures)
+
+    # Export to Excel
+    df.to_excel(filename, index=True)
+
+    print(f"Emploi du temps exporté vers {filename}.")
+
+
+# Verificate if connexion was etablished
 if client.logged_in:
-    today = datetime.date.today()
+    today = date.today()
     days_ahead = 7 - today.weekday()
-    next_monday = today + datetime.timedelta(days=days_ahead)
-    next_sunday = next_monday + datetime.timedelta(days=6)
+    next_monday = today + timedelta(days=days_ahead)
+    next_sunday = next_monday + timedelta(days=6)
     timetable = client.lessons(next_monday, next_sunday)
-
-    for lesson in timetable:
-        print(f"Leçon: {lesson.subject.name}")
-        print(f"De {lesson.start} à {lesson.end}")
+    print("Emploi du temps récupéré !")
 
     # Ask user for output format
-    output_format = input("Voulez-vous exporter l'emploi du temps en Excel (1) ou en PDF (2) ? ").strip()
+    output_format = input("Voulez-vous exporter l'emploi du temps en Excel (1) ou dans le terminal directement (2) ? ").strip()
 
     if output_format == "1":
-        export_to_excel(timetable, "emploi_du_temps.xlsx")
+        export_to_excel_with_design(timetable, "emploi_du_temps.xlsx")
     elif output_format == "2":
-        export_to_pdf(timetable, "emploi_du_temps.pdf")
+        # Browse and view the timetable
+        for lesson in timetable:
+            print(f"Leçon: {lesson.subject.name}")
+            print(f"De {lesson.start} à {lesson.end}")
     else:
-        print("Format non reconnu. Veuillez choisir entre 1 (Excel) et 2 (PDF).")
+        print("Format non reconnu. Veuillez choisir entre 1 (Excel) et 2 (TERMINAL).")
 else:
     print("Connexion échouée.")

@@ -144,3 +144,21 @@ if ENT is not None:  # Check if ENT is defined
         username=USERNAME,
         password=PASSWORD,
         ent=ENT)
+    
+# Vérificate if connexion was etablished
+if client.logged_in:
+    # Calculate the date of next monday
+    today = datetime.date.today()
+    days_ahead = 7 - today.weekday()  # Next monday will be in 'days_ahead' days
+    next_monday = today + datetime.timedelta(days=days_ahead)
+    next_sunday = next_monday + datetime.timedelta(days=6)
+
+    # Get the timetable from next Monday
+    timetable = client.lessons(next_monday, next_sunday)
+
+    # Browse and view the timetable
+    for lesson in timetable:
+        print(f"Leçon: {lesson.subject.name}")
+        print(f"De {lesson.start} à {lesson.end}")
+else:
+    print("Connexion échouée.")

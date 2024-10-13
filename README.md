@@ -10,7 +10,7 @@ Additional tools for PRONOTE
 
 ## Requirements
 To run most programs of this project, you'll need to install **Python** (Python3).
-There are **.sh** files that can help you for a the easiest installation. Follow carefully the instructions for your OS.
+There are **.sh** files that can help you for a better installation. Follow carefully the instructions for your OS.
 
 ## Installation and basic usage
 Follow these steps to set up the project:

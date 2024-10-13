@@ -27,10 +27,10 @@ Follow these steps to set up the project:
     # run start-py.sh
     ./start-linux.sh
     ```
-    If you are on **Windows**, you can run the `start-windows.sh` file.
+    If you are on **Windows**, you can run the `setup-windows.py` file.
     ```shell
-    # run start-py.sh
-    bash start-windows.sh
+    # run setup-windows.py
+    python3 setup-windows.py
     ```
 
     If you are on another operating system, you have to manually install dependencies and run the script you want.

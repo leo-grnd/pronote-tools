@@ -22,12 +22,12 @@ Follow these steps to set up the project:
     ```
 
 2. Install dependencies and run a script:
-    If you are on **Linux**, you can run the `start-py.sh` file. It will automatically do all the work, you have just to enter the name of the python file you want to execute.
+    If you are on **Linux**, you can run the `start-linux.sh` file. It will automatically do all the work, you have just to enter the name of the python file you want to execute.
     ```shell
     # run start-py.sh
     ./start-linux.sh
     ```
-    If you are on **Windows**, you can run the `start-py.sh` file.
+    If you are on **Windows**, you can run the `start-windows.sh` file.
     ```shell
     # run start-py.sh
     bash start-windows.sh

@@ -1,5 +1,6 @@
 import datetime
 from datetime import datetime, date, timedelta
+import openpyxl
 import os
 import pronotepy
 import configparser
@@ -158,7 +159,7 @@ if client.logged_in:
     print("Emploi du temps récupéré !")
 
     # Ask user for output format
-    output_format = input("Voulez-vous exporter l'emploi du temps en .txt (1) ou dans le terminal directement (2) ? ").strip()
+    output_format = input("Voulez-vous exporter l'emploi du temps en .txt (1), dans le terminal directement (2) ou dans un fichier excel (3) ? ").strip()
 
 if output_format == "1":
     with open("all-scripts/emploi_du_temps.txt", "w") as file:
@@ -173,7 +174,18 @@ elif output_format == "2":
     for lesson in timetable:
             print(f"Leçon: {lesson.subject.name}")
             print(f"De {lesson.start} à {lesson.end}")
-    else:
-        print("Format non reconnu. Veuillez choisir entre 1 (Excel) et 2 (TERMINAL).")
+elif output_format == "3":
+
+    # Open existing Excel file
+    wb = openpyxl.load_workbook('all-scripts/emploi_du_temps.xlsx')
+    feuille = wb.active  # Select active sheet
+
+    # Go through all cells and empty them
+    for row in feuille.iter_rows():
+        for cell in row:
+            cell.value = None  # Clear cell contents
+
+    # Save Excel file
+    wb.save('all-scripts/emploi_du_temps.xlsx')
 else:
-    print("Connexion échouée.")
+    print("Ereur, vérifier la connexion ou le format sélectionné")

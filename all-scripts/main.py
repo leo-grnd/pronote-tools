@@ -5,6 +5,7 @@ import os
 import pronotepy
 import configparser
 import getpass
+from pushbullet import Pushbullet
 from tabulate import tabulate
 from pronotepy.ent import (
     cas_arsene76,
@@ -88,6 +89,8 @@ ent_options = {
 config_file = 'config_tool.ini'
 config = configparser.ConfigParser()
 
+config_file2 = 'config_push.ini'
+config2 = configparser.ConfigParser()
 # If the config file exists, read it
 if os.path.exists(config_file):
     config.read(config_file)
@@ -146,3 +149,20 @@ if ENT is not None:  # Check if ENT is defined
         username=USERNAME,
         password=PASSWORD,
         ent=ENT)
+    
+if client.logged_in:
+    if os.path.exists(config_file2):
+        config.read(config_file2)
+        APIKEY = config2.get('login', 'token')
+
+    else:
+        # Ask user for login information
+        APIKEY = str(input("Quel est votre clé d'API Pushbullet ? : "))
+
+    # Save the information in the config file
+        config2['login'] = {
+            'token': APIKEY,
+        }
+
+        with open(config_file2, 'w') as configfile2:
+            config.write(configfile2)

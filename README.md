@@ -17,7 +17,7 @@ Follow these steps to set up the project:
 
 1. Clone the repository:
     ```shell
-    git clone https://github.com/tristan-gscn/pronote-tools.git
+    git clone https://github.com/leoo84/pronote-tools.git
     cd pronote-tools
     ```
 

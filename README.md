@@ -1,43 +1,60 @@
-# pronote-tools
+# 📚 pronote-tools
 Additional tools for PRONOTE
 
-## Description
-`pronote-tools` is a project based on the `pronotepy` library. Its goal is to give better interface and functionnalities to PRONOTE for the users, like **Python console prompt** or **mobile notifications**.
+## 📝 Description
+`pronote-tools` is a project based on the `pronotepy` library. Its goal is to provide a better interface and additional functionalities for PRONOTE users. Features include a **Python console prompt** and **mobile notifications**, among others.
 
-## Table of Contents
-- [Requirements](#requirements)
-- [Installation](#installation)
+---
 
-## Requirements
-To run most programs of this project, you'll need to install **Python** (Python3).
-There are **.sh** files that can help you for a better installation. Follow carefully the instructions for your OS.
+## 📖 Table of Contents
+- [📋 Requirements](#-requirements)
+- [⚙️ Installation and Basic Usage](#-installation-and-basic-usage)
 
-## Installation and basic usage
-Follow these steps to set up the project:
+---
 
-1. Clone the repository:
-    ```shell
-    git clone https://github.com/leoo84/pronote-tools.git
-    cd pronote-tools
-    ```
+## 📋 Requirements
+To run most programs in this project, you'll need **Python 3** installed on your system.  
+For easier setup, there are **.sh** files available for automated installation. Please follow the instructions carefully based on your operating system.
 
-2. Install dependencies and run a script:
-    If you are on **Linux**, you can run the `start-linux.sh` file. It will automatically do all the work, you have just to enter the name of the python file you want to execute.
-    ```shell
-    # run start-py.sh
-    ./start-linux.sh
-    ```
-    If you are on **Windows**, you can run the `setup-windows.py` file.
-    ```shell
-    # run setup-windows.py
-    python3 setup-windows.py
-    ```
+---
 
-    If you are on another operating system, you have to manually install dependencies and run the script you want.
-    ```shell
-    # install dependencies
-    pip install -q pycryptodome beautifulsoup4 requests autoslot tabulate pronotepy openpyxl pandas fpdf xlsxwriter
+## ⚙️ Installation and Basic Usage
+Follow these steps to set up and use the project:
 
-    # run a script
-    python [your-python-file]
-    ```
+### Step 1: Clone the Repository
+```bash
+git clone https://github.com/leoo84/pronote-tools.git
+cd pronote-tools
+```
+
+### Step 2: Install Dependencies and Run Scripts
+#### 🐧 For Linux Users
+Run the `start-linux.sh` file for automated setup:
+```bash
+# Run start-linux.sh
+./start-linux.sh
+```
+Simply enter the name of the Python file you want to execute when prompted.
+
+#### 🪟 For Windows Users
+Run the `setup-windows.py` file:
+```bash
+# Run setup-windows.py
+python3 setup-windows.py
+```
+
+#### 🌐 For Other Operating Systems
+Manually install the required dependencies and run your desired script:
+```bash
+# Install dependencies
+pip install -q pycryptodome beautifulsoup4 requests autoslot tabulate pronotepy openpyxl pandas fpdf xlsxwriter
+
+# Run a script
+python [your-python-file]
+```
+
+---
+
+Enjoy using `pronote-tools`! 🎉  
+Feel free to contribute or raise issues if you encounter any problems. 🚀
+```

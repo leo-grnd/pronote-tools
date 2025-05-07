@@ -5,6 +5,12 @@ import configparser
 import getpass
 from tabulate import tabulate
 import json
+import matplotlib.pyplot as plt
+import numpy as np
+from matplotlib.ticker import MaxNLocator
+import matplotlib.dates as mdates
+from datetime import datetime as dt
+from collections import defaultdict
 from pronotepy.ent import (
     cas_arsene76,
     cas_ent27,
@@ -83,6 +89,227 @@ ent_options = {
     "35": ("laclasse_lyon", laclasse_lyon),
     "36": ("extranet_colleges_somme", extranet_colleges_somme)
 }
+
+# Define all helper functions first
+def generate_subject_averages_graph(data, output_dir):
+    """Generate a bar chart showing average grades by subject"""
+    plt.figure(figsize=(12, 8))
+    
+    # Calculate average grade per subject
+    subject_grades = defaultdict(list)
+    for grade in data["grades"]:
+        # Convert grade value to float, handling French decimal format
+        try:
+            value = float(grade["value"].replace(',', '.'))
+            max_value = float(grade["max_value"].replace(',', '.'))
+            # Normalize to a scale of 20
+            normalized_value = (value / max_value) * 20
+            subject_grades[grade["subject"]].append(normalized_value)
+        except (ValueError, AttributeError):
+            continue
+    
+    # Calculate averages
+    subjects = []
+    averages = []
+    
+    for subject, grades in subject_grades.items():
+        if grades:
+            subjects.append(subject)
+            averages.append(sum(grades) / len(grades))
+    
+    # Sort by average
+    sorted_data = sorted(zip(subjects, averages), key=lambda x: x[1])
+    subjects = [x[0] for x in sorted_data]
+    averages = [x[1] for x in sorted_data]
+    
+    # Create bar chart
+    bars = plt.barh(subjects, averages, color='skyblue')
+    
+    # Add value labels to bars
+    for i, bar in enumerate(bars):
+        plt.text(bar.get_width() + 0.2, bar.get_y() + bar.get_height()/2, 
+                f'{averages[i]:.2f}/20', 
+                va='center')
+    
+    plt.xlabel('Moyenne /20')
+    plt.ylabel('Matières')
+    plt.title('Moyenne par matière')
+    plt.grid(axis='x', linestyle='--', alpha=0.7)
+    plt.tight_layout()
+    
+    # Add a vertical line at 10/20
+    plt.axvline(x=10, color='red', linestyle='--', alpha=0.7)
+    
+    # Save the figure
+    plt.savefig(os.path.join(output_dir, 'subject_averages.png'), dpi=300, bbox_inches='tight')
+    plt.close()
+
+def generate_grade_distribution_graph(data, output_dir):
+    """Generate a histogram showing the distribution of grades"""
+    plt.figure(figsize=(10, 6))
+    
+    # Extract normalized grades
+    all_grades = []
+    for grade in data["grades"]:
+        try:
+            value = float(grade["value"].replace(',', '.'))
+            max_value = float(grade["max_value"].replace(',', '.'))
+            # Normalize to a scale of 20
+            normalized_value = (value / max_value) * 20
+            all_grades.append(normalized_value)
+        except (ValueError, AttributeError):
+            continue
+    
+    # Create histogram
+    plt.hist(all_grades, bins=10, color='lightgreen', edgecolor='black')
+    plt.xlabel('Notes /20')
+    plt.ylabel('Fréquence')
+    plt.title('Distribution des notes')
+    plt.grid(linestyle='--', alpha=0.7)
+    
+    # Add mean line
+    mean_grade = sum(all_grades) / len(all_grades) if all_grades else 0
+    plt.axvline(mean_grade, color='red', linestyle='dashed', linewidth=2, label=f'Moyenne: {mean_grade:.2f}/20')
+    plt.legend()
+    
+    # Save the figure
+    plt.savefig(os.path.join(output_dir, 'grade_distribution.png'), dpi=300, bbox_inches='tight')
+    plt.close()
+
+def generate_time_progression_graph(data, output_dir):
+    """Generate a line chart showing grade progression over time"""
+    plt.figure(figsize=(12, 8))
+    
+    # Group grades by subject and sort by date
+    subjects_data = defaultdict(list)
+    
+    for grade in data["grades"]:
+        try:
+            date = dt.fromisoformat(grade["date"]) if grade["date"].find("T") > 0 else dt.strptime(grade["date"], "%Y-%m-%d")
+            value = float(grade["value"].replace(',', '.'))
+            max_value = float(grade["max_value"].replace(',', '.'))
+            # Normalize to a scale of 20
+            normalized_value = (value / max_value) * 20
+            subjects_data[grade["subject"]].append((date, normalized_value))
+        except (ValueError, AttributeError) as e:
+            continue
+    
+    # Sort by date for each subject
+    for subject in subjects_data:
+        subjects_data[subject].sort(key=lambda x: x[0])
+    
+    # Plot each subject
+    for subject, points in subjects_data.items():
+        if len(points) > 1:  # Only plot subjects with multiple grades
+            dates = [p[0] for p in points]
+            grades = [p[1] for p in points]
+            plt.plot(dates, grades, marker='o', linestyle='-', label=subject)
+    
+    # Format the plot
+    plt.xlabel('Date')
+    plt.ylabel('Note /20')
+    plt.title('Évolution des notes dans le temps')
+    plt.grid(linestyle='--', alpha=0.7)
+    
+    # Format x-axis as dates
+    plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%d/%m/%Y'))
+    plt.gca().xaxis.set_major_locator(mdates.DayLocator(interval=7))
+    plt.gcf().autofmt_xdate()  # Rotate date labels
+    
+    # Add legend
+    if len(subjects_data) > 1:
+        plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+    
+    plt.tight_layout()
+    plt.savefig(os.path.join(output_dir, 'time_progression.png'), dpi=300, bbox_inches='tight')
+    plt.close()
+
+def generate_student_vs_class_graph(data, output_dir):
+    """Generate a bar chart comparing student grades to class averages"""
+    plt.figure(figsize=(12, 8))
+    
+    # Extract student grades and class averages by subject
+    subjects = []
+    student_grades = []
+    class_grades = []
+    
+    # Group by subject and calculate average if multiple grades per subject
+    subject_data = defaultdict(lambda: {"student": [], "class": []})
+    
+    for grade in data["grades"]:
+        try:
+            # Student grade
+            value = float(grade["value"].replace(',', '.'))
+            max_value = float(grade["max_value"].replace(',', '.'))
+            normalized_value = (value / max_value) * 20
+            
+            # Class average
+            class_avg = float(grade["class_average"].replace(',', '.'))
+            normalized_class = (class_avg / max_value) * 20
+            
+            subject_data[grade["subject"]]["student"].append(normalized_value)
+            subject_data[grade["subject"]]["class"].append(normalized_class)
+        except (ValueError, AttributeError, KeyError):
+            continue
+    
+    # Calculate averages per subject
+    for subject, values in subject_data.items():
+        if values["student"] and values["class"]:
+            subjects.append(subject)
+            student_grades.append(sum(values["student"]) / len(values["student"]))
+            class_grades.append(sum(values["class"]) / len(values["class"]))
+    
+    # Create grouped bar chart
+    x = np.arange(len(subjects))
+    width = 0.35
+    
+    fig, ax = plt.subplots(figsize=(12, 8))
+    rects1 = ax.bar(x - width/2, student_grades, width, label='Élève', color='skyblue')
+    rects2 = ax.bar(x + width/2, class_grades, width, label='Classe', color='lightgreen')
+    
+    # Add labels and title
+    ax.set_xlabel('Matière')
+    ax.set_ylabel('Note moyenne /20')
+    ax.set_title('Comparaison des notes de l\'élève avec la moyenne de la classe')
+    ax.set_xticks(x)
+    ax.set_xticklabels(subjects, rotation=45, ha='right')
+    ax.legend()
+    
+    # Add a horizontal line at 10/20
+    ax.axhline(y=10, color='red', linestyle='--', alpha=0.7)
+    
+    # Add value labels on bars
+    def add_labels(rects):
+        for rect in rects:
+            height = rect.get_height()
+            ax.annotate(f'{height:.2f}',
+                        xy=(rect.get_x() + rect.get_width() / 2, height),
+                        xytext=(0, 3),  # 3 points vertical offset
+                        textcoords="offset points",
+                        ha='center', va='bottom')
+    
+    add_labels(rects1)
+    add_labels(rects2)
+    
+    fig.tight_layout()
+    plt.savefig(os.path.join(output_dir, 'student_vs_class.png'), dpi=300, bbox_inches='tight')
+    plt.close()
+
+def generate_graphics(data):
+    """Generate graphics based on grades data"""
+    # Create graphics directory if it doesn't exist
+    graphics_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "graphics")
+    os.makedirs(graphics_dir, exist_ok=True)
+    
+    print("\nGénération des graphiques en cours...")
+    
+    # Generate different types of visualizations
+    generate_subject_averages_graph(data, graphics_dir)
+    generate_grade_distribution_graph(data, graphics_dir)
+    generate_time_progression_graph(data, graphics_dir)
+    generate_student_vs_class_graph(data, graphics_dir)
+    
+    print(f"Graphiques enregistrés dans le dossier: {graphics_dir}")
 
 config_file = 'config_tool.ini'
 config = configparser.ConfigParser()
@@ -205,6 +432,9 @@ if client.logged_in:
         with open(output_file, 'w', encoding='utf-8') as f:
             json.dump(grades_data, f, ensure_ascii=False, indent=4)
         print(f"Grades successfully saved to {output_file}")
+        
+        # Generate graphics
+        generate_graphics(grades_data)
     except Exception as e:
         print(f"Error saving grades to file: {e}")
 else:

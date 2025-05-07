@@ -4,6 +4,7 @@ import pronotepy
 import configparser
 import getpass
 from tabulate import tabulate
+import json
 from pronotepy.ent import (
     cas_arsene76,
     cas_ent27,
@@ -146,8 +147,19 @@ if ENT is not None:  # Check if ENT is defined
         ent=ENT)
     
 if client.logged_in:
-    # Get the current period (or any specific period)
-    current_period = client.periods[0]  # Assume first period is the current one
+    # Afficher les périodes disponibles
+    print("Périodes disponibles :")
+    for idx, period in enumerate(client.periods):
+        print(f"{idx + 1}. {period.name} ({period.start} -> {period.end})")
+
+    # Demander à l'utilisateur de choisir la période
+    choix = input("Sélectionnez le numéro de la période souhaitée : ").strip()
+    try:
+        choix_idx = int(choix) - 1
+        current_period = client.periods[choix_idx]
+    except (ValueError, IndexError):
+        print("Numéro de période invalide.")
+        exit(1)
 
     # Retrieve the grades for this period
     grades = current_period.grades
@@ -155,5 +167,45 @@ if client.logged_in:
     # Print the grades
     for grade in grades:
         print(f"Matière: {grade.subject.name}, Note: {grade.grade}/{grade.out_of}, moyenne (classe) : {grade.average}")
+    
+    # Create a structured data representation for the grades
+    grades_data = {
+        "student": {
+            "name": client.info.name,
+            "class": client.info.class_name
+        },
+        "period": {
+            "name": current_period.name,
+            "start": current_period.start.isoformat() if hasattr(current_period.start, "isoformat") else str(current_period.start),
+            "end": current_period.end.isoformat() if hasattr(current_period.end, "isoformat") else str(current_period.end)
+        },
+        "grades": []
+    }
+
+    # Add each grade to the data structure
+    for grade in grades:
+        grade_data = {
+            "subject": grade.subject.name,
+            "value": grade.grade,
+            "max_value": grade.out_of,
+            "date": grade.date.isoformat() if hasattr(grade.date, "isoformat") else str(grade.date),
+            "class_average": grade.average,
+            "coefficient": grade.coefficient
+        }
+        
+        # Add optional fields if they exist
+        if hasattr(grade, "comment") and grade.comment:
+            grade_data["comment"] = grade.comment
+            
+        grades_data["grades"].append(grade_data)
+
+    # Save to a file
+    output_file = "grades_data.json"
+    try:
+        with open(output_file, 'w', encoding='utf-8') as f:
+            json.dump(grades_data, f, ensure_ascii=False, indent=4)
+        print(f"Grades successfully saved to {output_file}")
+    except Exception as e:
+        print(f"Error saving grades to file: {e}")
 else:
     print("Connexion impossible.")
